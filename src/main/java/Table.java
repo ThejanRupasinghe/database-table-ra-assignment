@@ -333,6 +333,24 @@ public class Table
         String[] t_attrs = attributes1.split(" ");
         String[] u_attrs = attributes2.split(" ");
 
+        // TODO: 2/21/2020 similar attributes with 2
+        String[] table2FinalAttributes = new String[table2.attribute.length];
+        for (int i = 0; i < table2.attribute.length; i++) {
+            boolean isEqual = false;
+            for (int j = 0; j < this.attribute.length; j++) {
+                if (table2.attribute[i].equals(this.attribute[j])) {
+                    isEqual = true;
+                    break;
+                }
+            }
+
+            if (isEqual){
+                table2FinalAttributes[i] = table2.attribute[i] + "2";
+            } else{
+                table2FinalAttributes[i] = table2.attribute[i];
+            }
+        }
+
         List<Comparable[]> rows = new ArrayList<>();
 
         boolean addTuple = false;
@@ -356,7 +374,7 @@ public class Table
             }
         }
 
-        return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
+        return new Table(name + count++, ArrayUtil.concat(attribute, table2FinalAttributes),
                 ArrayUtil.concat(domain, table2.domain), key, rows);
     } // join
 
@@ -401,8 +419,49 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        ArrayList<String> commonAttributes = new ArrayList<>();
 
+        for (int i = 0; i < attribute.length; i++) {
+            for (int j = 0; j < table2.attribute.length; j++) {
+                if (attribute[i].equals(table2.attribute[j])) {
+                    commonAttributes.add(attribute[i]);
+                    break;
+                }
+            }
+        }
+
+        /*
+        String commonAttributesStr = commonAttributes.toString();
+
+        commonAttributesStr = commonAttributesStr.replace("[", "")
+                .replace("]", "")
+                .replace(",", "");
+
+        return this.join(commonAttributesStr, commonAttributesStr, table2);
+         */
+
+        // TODO: 2/22/2020 eliminate duplicate fields
+
+        boolean addTuple = false;
+
+        for (int i = 0; i < this.getTableSize(); i++) {
+            for (int j = 0; j < table2.getTableSize(); j++) {
+                Comparable[] tuple1 = tuples.get(i);
+                Comparable[] tuple2 = table2.getTuples().get(j);
+                addTuple = false;
+                for (int m = 0; m < commonAttributes.size(); m++) {
+                    if (tuple1[this.col(commonAttributes.get(m))] == tuple2[table2.col(commonAttributes.get(m))]) {
+                        addTuple = true;
+                    } else {
+                        addTuple = false;
+                        break;
+                    }
+                }
+                if (addTuple) {
+                    rows.add(ArrayUtil.concat(tuple1, tuple2));
+                }
+            }
+        }
         // FIX - eliminate duplicate columns
         return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
                 ArrayUtil.concat(domain, table2.domain), key, rows);
@@ -600,7 +659,19 @@ public class Table
      *          with the given domains
      */
     private boolean typeCheck(Comparable[] t) {
-        //  T O   B E   I M P L E M E N T E D 
+
+        if (t.length != attribute.length) return false;
+
+        for (int i = 0; i < domain.length; i++) {
+
+            // TODO: 2/21/2020  
+            // checks t's type and compares it to the current domain
+            if (t[i].getClass().equals(domain[i].getClass())) {
+
+                return false;
+
+            } // if
+        } // for
 
         return true;
     } // typeCheck
