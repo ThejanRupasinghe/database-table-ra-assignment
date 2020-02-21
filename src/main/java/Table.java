@@ -264,7 +264,7 @@ public class Table
         for (int j = 0; j < table2.getTableSize(); j++) {
             boolean exists = false;
             for (int k = 0; k < getTableSize(); k++) {
-                if (Arrays.equals(table2.getTuples().get(j),tuples.get(k))) {
+                if (Arrays.equals(table2.getTuples().get(j), tuples.get(k))) {
                     exists = true;
                     break;
                 }
@@ -298,7 +298,7 @@ public class Table
         for (int i = 0; i < getTableSize(); i++) {
             boolean exists = false;
             for (int j = 0; j < table2.getTableSize(); j++) {
-                if (Arrays.equals(tuples.get(i),table2.getTuples().get(j))) {
+                if (Arrays.equals(tuples.get(i), table2.getTuples().get(j))) {
                     exists = true;
                     break;
                 }
@@ -335,7 +335,26 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        boolean addTuple = false;
+
+        for (int i = 0; i < this.getTableSize(); i++) {
+            for (int j = 0; j < table2.getTableSize(); j++) {
+                Comparable[] tuple1 = tuples.get(i);
+                Comparable[] tuple2 = table2.getTuples().get(j);
+                addTuple = false;
+                for (int m = 0; m < t_attrs.length; m++) {
+                    if (tuple1[this.col(t_attrs[m])] == tuple2[table2.col(u_attrs[m])]) {
+                        addTuple = true;
+                    } else {
+                        addTuple = false;
+                        break;
+                    }
+                }
+                if (addTuple) {
+                    rows.add(ArrayUtil.concat(tuple1, tuple2));
+                }
+            }
+        }
 
         return new Table(name + count++, ArrayUtil.concat(attribute, table2.attribute),
                 ArrayUtil.concat(domain, table2.domain), key, rows);
