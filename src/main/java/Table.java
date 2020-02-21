@@ -171,7 +171,8 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        // in which index the required attributes are
+        /* WITHOUT USING EXISTING FUNCTIONS - extract and match
+        // in which indexes the required attributes are
         int[] attrIndex = new int[attrs.length];
         for (int i = 0; i < attrs.length; i++) {
             for (int j = 0; j < attribute.length; j++) {
@@ -182,12 +183,19 @@ public class Table
             }
         }
 
+        // pick required attributes from each row
         for (int i = 0; i < getTableSize(); i++) {
             Comparable[] row = new Comparable[attrs.length];
             for (int j = 0; j < attrIndex.length; j++) {
                 row[j] = tuples.get(i)[attrIndex[j]];
             }
             rows.add(row);
+        }
+         */
+
+        // using extract
+        for (int i = 0; i < getTableSize(); i++) {
+            rows.add(extract(tuples.get(i), attrs));
         }
 
         return new Table(name + count++, attrs, colDomain, newKey, rows);
@@ -224,7 +232,11 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        // get the tuple that matches the keyval
+        Comparable[] tuple = index.get(keyVal);
+        if (tuple != null) {
+            rows.add(tuple);
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // select
@@ -243,7 +255,26 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        // add everything from table1
+        for (int i = 0; i < getTableSize(); i++) {
+            rows.add(tuples.get(i));
+        }
+
+        // take row by row from table2
+        for (int j = 0; j < table2.getTableSize(); j++) {
+            boolean exists = false;
+            for (int k = 0; k < getTableSize(); k++) {
+                if (Arrays.equals(table2.getTuples().get(j),tuples.get(k))) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            // add only if the row is not existing in table1
+            if (!exists) {
+                rows.add(table2.getTuples().get(j));
+            }
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // union
@@ -263,7 +294,21 @@ public class Table
 
         List<Comparable[]> rows = new ArrayList<>();
 
-        //  T O   B E   I M P L E M E N T E D 
+        // take row by row from table1
+        for (int i = 0; i < getTableSize(); i++) {
+            boolean exists = false;
+            for (int j = 0; j < table2.getTableSize(); j++) {
+                if (Arrays.equals(tuples.get(i),table2.getTuples().get(j))) {
+                    exists = true;
+                    break;
+                }
+            }
+
+            // add only if the row is not existing in table2
+            if (!exists) {
+                rows.add(tuples.get(i));
+            }
+        }
 
         return new Table(name + count++, attribute, domain, key, rows);
     } // minus
